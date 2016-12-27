@@ -65,6 +65,9 @@ class BaseTestCase(base.BaseNetworkTest):
     def resource_setup(cls):
         super(BaseTestCase, cls).resource_setup()
 
+        cls.listener_protocol = CONF.lbaas.default_listener_protocol
+        cls.pool_protocol = CONF.lbaas.default_pool_protocol
+
         mgr = cls.get_client_manager()
         auth_provider = mgr.auth_provider
         client_args = _setup_client_args(auth_provider)
