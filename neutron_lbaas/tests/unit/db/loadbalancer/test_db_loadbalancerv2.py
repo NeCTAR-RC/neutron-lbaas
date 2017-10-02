@@ -341,7 +341,7 @@ class LbaasTestMixin(object):
                 self._delete('loadbalancers', lb['id'])
 
     @contextlib.contextmanager
-    def listener(self, fmt=None, protocol='HTTP', loadbalancer_id=None,
+    def listener(self, fmt=None, protocol='TCP', loadbalancer_id=None,
                  protocol_port=80, default_pool_id=None, no_delete=False,
                  **kwargs):
         if not fmt:
@@ -371,7 +371,7 @@ class LbaasTestMixin(object):
             self._delete('listeners', listener['listener']['id'])
 
     @contextlib.contextmanager
-    def pool(self, fmt=None, protocol='HTTP', lb_algorithm='ROUND_ROBIN',
+    def pool(self, fmt=None, protocol='TCP', lb_algorithm='ROUND_ROBIN',
              no_delete=False, listener_id=None,
              loadbalancer_id=None, **kwargs):
         if not fmt:
@@ -1174,7 +1174,7 @@ class TestLoadBalancerGraphCreation(LbaasPluginDbTestCase):
         create_listener = {
             'name': name,
             'protocol_port': protocol_port,
-            'protocol': lb_const.PROTOCOL_HTTP,
+            'protocol': lb_const.PROTOCOL_TCP,
             'tenant_id': self._tenant_id,
         }
         if create_default_pool:
@@ -1201,7 +1201,7 @@ class TestLoadBalancerGraphCreation(LbaasPluginDbTestCase):
                          expected_hm=None):
         create_pool = {
             'name': name,
-            'protocol': lb_const.PROTOCOL_HTTP,
+            'protocol': lb_const.PROTOCOL_TCP,
             'lb_algorithm': lb_const.LB_METHOD_ROUND_ROBIN,
             'tenant_id': self._tenant_id
         }
@@ -1240,7 +1240,7 @@ class TestLoadBalancerGraphCreation(LbaasPluginDbTestCase):
     def _get_hm_bodies(self, name='hm1'):
         create_hm = {
             'name': name,
-            'type': lb_const.HEALTH_MONITOR_HTTP,
+            'type': lb_const.HEALTH_MONITOR_TCP,
             'delay': 1,
             'timeout': 1,
             'max_retries': 1,
@@ -1248,9 +1248,9 @@ class TestLoadBalancerGraphCreation(LbaasPluginDbTestCase):
             'max_retries_down': 1
         }
         expected_hm = {
-            'http_method': 'GET',
-            'url_path': '/',
-            'expected_codes': '200',
+            # 'http_method': 'GET',
+            # 'url_path': '/',
+            # 'expected_codes': '200',
             'admin_state_up': True
         }
         expected_hm.update(create_hm)
@@ -1493,7 +1493,7 @@ class LbaasListenerTests(ListenerTestBase):
 
     def test_create_listener(self, **extras):
         expected = {
-            'protocol': 'HTTP',
+            'protocol': 'TCP',
             'protocol_port': 80,
             'admin_state_up': True,
             'tenant_id': self._tenant_id,
@@ -1516,13 +1516,13 @@ class LbaasListenerTests(ListenerTestBase):
 
     def test_create_listener_with_default_pool_no_lb(self, **extras):
         listener_pool_res = self._create_pool(
-            self.fmt, lb_const.PROTOCOL_HTTP,
+            self.fmt, lb_const.PROTOCOL_TCP,
             lb_const.LB_METHOD_ROUND_ROBIN,
             loadbalancer_id=self.lb_id)
         listener_pool = self.deserialize(self.fmt, listener_pool_res)
         listener_pool_id = listener_pool['pool']['id']
         expected = {
-            'protocol': 'HTTP',
+            'protocol': 'TCP',
             'protocol_port': 80,
             'admin_state_up': True,
             'tenant_id': self._tenant_id,
@@ -1545,10 +1545,11 @@ class LbaasListenerTests(ListenerTestBase):
     def test_create_listener_same_port_same_load_balancer(self):
         with self.listener(loadbalancer_id=self.lb_id,
                            protocol_port=80):
-            self._create_listener(self.fmt, 'HTTP', 80,
+            self._create_listener(self.fmt, 'TCP', 80,
                                   loadbalancer_id=self.lb_id,
                                   expected_res_status=409)
 
+    @testtools.skip("HTTPS is not supported in midonet")
     def test_create_listener_with_tls_no_default_container(self, **extras):
         listener_data = {
             'protocol': lb_const.PROTOCOL_TERMINATED_HTTPS,
@@ -1566,6 +1567,7 @@ class LbaasListenerTests(ListenerTestBase):
                         context.get_admin_context(),
                         {'listener': listener_data})
 
+    @testtools.skip("HTTPS is not supported in midonet")
     def test_create_listener_with_tls_missing_container(self, **extras):
         default_tls_container_ref = uuidutils.generate_uuid()
 
@@ -1603,6 +1605,7 @@ class LbaasListenerTests(ListenerTestBase):
                               context.get_admin_context(),
                               {'listener': listener_data})
 
+    @testtools.skip("HTTPS is not supported in midonet")
     def test_create_listener_with_tls_invalid_service_acct(self, **extras):
         default_tls_container_ref = uuidutils.generate_uuid()
         listener_data = {
@@ -1628,6 +1631,7 @@ class LbaasListenerTests(ListenerTestBase):
                               context.get_admin_context(),
                               {'listener': listener_data})
 
+    @testtools.skip("HTTPS is not supported in midonet")
     def test_create_listener_with_tls_invalid_container(self, **extras):
         default_tls_container_ref = uuidutils.generate_uuid()
         cfg.CONF.set_override('service_name',
@@ -1669,6 +1673,7 @@ class LbaasListenerTests(ListenerTestBase):
                 resource_ref=cert_manager.CertManager.get_service_url(
                     self.lb_id))
 
+    @testtools.skip("HTTPS is not supported in midonet")
     def test_create_listener_with_tls(self, **extras):
         default_tls_container_ref = uuidutils.generate_uuid()
         sni_tls_container_ref_1 = uuidutils.generate_uuid()
@@ -1704,7 +1709,7 @@ class LbaasListenerTests(ListenerTestBase):
                 )
 
     def test_create_listener_loadbalancer_id_does_not_exist(self):
-        self._create_listener(self.fmt, 'HTTP', 80,
+        self._create_listener(self.fmt, 'TCP', 80,
                               loadbalancer_id=uuidutils.generate_uuid(),
                               expected_res_status=404)
 
@@ -1728,7 +1733,7 @@ class LbaasListenerTests(ListenerTestBase):
                 p_id = p1['pool']['id']
                 data = {'listener': {'name': '',
                                      'protocol_port': 80,
-                                     'protocol': 'HTTP',
+                                     'protocol': 'TCP',
                                      'connection_limit': 100,
                                      'admin_state_up': True,
                                      'tenant_id': self._tenant_id,
@@ -1742,7 +1747,7 @@ class LbaasListenerTests(ListenerTestBase):
         name = 'new_listener'
         expected_values = {'name': name,
                            'protocol_port': 80,
-                           'protocol': 'HTTP',
+                           'protocol': 'TCP',
                            'connection_limit': 100,
                            'admin_state_up': False,
                            'tenant_id': self._tenant_id,
@@ -1759,6 +1764,7 @@ class LbaasListenerTests(ListenerTestBase):
             self._validate_statuses(self.lb_id, listener_id,
                                     listener_disabled=True)
 
+    @testtools.skip("HTTPS is not supported in midonet")
     def test_update_listener_with_tls(self):
         default_tls_container_ref = uuidutils.generate_uuid()
         sni_tls_container_ref_1 = uuidutils.generate_uuid()
@@ -1827,6 +1833,7 @@ class LbaasListenerTests(ListenerTestBase):
                               sni_tls_container_ref_5],
                              listener['sni_container_refs'])
 
+    @testtools.skip("HTTPS is not supported in midonet")
     def test_update_listener_with_empty_tls(self):
         default_tls_container_ref = uuidutils.generate_uuid()
         sni_tls_container_ref_1 = uuidutils.generate_uuid()
@@ -1899,7 +1906,7 @@ class LbaasListenerTests(ListenerTestBase):
         name = 'show_listener'
         expected_values = {'name': name,
                            'protocol_port': 80,
-                           'protocol': 'HTTP',
+                           'protocol': 'TCP',
                            'connection_limit': -1,
                            'admin_state_up': True,
                            'tenant_id': self._tenant_id,
@@ -1916,7 +1923,7 @@ class LbaasListenerTests(ListenerTestBase):
         name = 'list_listeners'
         expected_values = {'name': name,
                            'protocol_port': 80,
-                           'protocol': 'HTTP',
+                           'protocol': 'TCP',
                            'connection_limit': -1,
                            'admin_state_up': True,
                            'tenant_id': self._tenant_id,
@@ -2828,9 +2835,9 @@ class PoolTestBase(ListenerTestBase):
 
     def setUp(self):
         super(PoolTestBase, self).setUp()
-        listener_res = self._create_listener(self.fmt, lb_const.PROTOCOL_HTTP,
+        listener_res = self._create_listener(self.fmt, lb_const.PROTOCOL_TCP,
                                              80, self.lb_id)
-        listener_res2 = self._create_listener(self.fmt, lb_const.PROTOCOL_HTTP,
+        listener_res2 = self._create_listener(self.fmt, lb_const.PROTOCOL_TCP,
                                               80, self.lb_id2)
         self.def_listener = self.deserialize(self.fmt, listener_res)
         self.def_listener2 = self.deserialize(self.fmt, listener_res2)
@@ -2879,7 +2886,7 @@ class LbaasPoolTests(PoolTestBase):
         expected = {
             'name': '',
             'description': '',
-            'protocol': 'HTTP',
+            'protocol': 'TCP',
             'lb_algorithm': 'ROUND_ROBIN',
             'admin_state_up': True,
             'tenant_id': self._tenant_id,
@@ -2910,7 +2917,7 @@ class LbaasPoolTests(PoolTestBase):
         expected = {
             'name': '',
             'description': '',
-            'protocol': 'HTTP',
+            'protocol': 'TCP',
             'lb_algorithm': 'ROUND_ROBIN',
             'admin_state_up': True,
             'tenant_id': self._tenant_id,
@@ -2939,7 +2946,7 @@ class LbaasPoolTests(PoolTestBase):
         expected = {
             'name': '',
             'description': '',
-            'protocol': 'HTTP',
+            'protocol': 'TCP',
             'lb_algorithm': 'ROUND_ROBIN',
             'admin_state_up': True,
             'tenant_id': self._tenant_id,
@@ -2964,8 +2971,8 @@ class LbaasPoolTests(PoolTestBase):
         expected = {
             'name': '',
             'description': '',
-            'protocol': 'HTTP',
-            'lb_algorithm': 'LEAST_CONNECTIONS',
+            'protocol': 'TCP',
+            'lb_algorithm': 'ROUND_ROBIN',
             'admin_state_up': True,
             'tenant_id': self._tenant_id,
             'listeners': [{'id': self.listener_id}],
@@ -2978,7 +2985,7 @@ class LbaasPoolTests(PoolTestBase):
         with self.pool(listener_id=self.listener_id) as pool:
             pool_id = pool['pool']['id']
             self.assertTrue(pool_id)
-            data = {'pool': {'lb_algorithm': 'LEAST_CONNECTIONS'}}
+            data = {'pool': {'lb_algorithm': 'ROUND_ROBIN'}}
             resp, body = self._update_pool_api(pool_id, data)
             actual = {}
             for k, v in body['pool'].items():
@@ -3035,7 +3042,7 @@ class LbaasPoolTests(PoolTestBase):
         with self.pool(listener_id=self.listener_id):
             data = {'pool': {'name': '',
                              'description': '',
-                             'protocol': 'HTTP',
+                             'protocol': 'TCP',
                              'lb_algorithm': 'ROUND_ROBIN',
                              'admin_state_up': True,
                              'tenant_id': self._tenant_id,
@@ -3043,6 +3050,7 @@ class LbaasPoolTests(PoolTestBase):
             resp, body = self._create_pool_api(data)
             self.assertEqual(webob.exc.HTTPConflict.code, resp.status_int)
 
+    @testtools.skip("HTTPS is not supported in midonet")
     def test_create_pool_with_pool_protocol_mismatch(self):
         with self.listener(protocol=lb_const.PROTOCOL_HTTPS,
                            loadbalancer_id=self.lb_id,
@@ -3087,7 +3095,7 @@ class LbaasPoolTests(PoolTestBase):
                     l_id = l1['listener']['id']
                     data = {'pool': {'name': '',
                                      'description': '',
-                                     'protocol': 'HTTP',
+                                     'protocol': 'TCP',
                                      'lb_algorithm': 'ROUND_ROBIN',
                                      'admin_state_up': True,
                                      'tenant_id': self._tenant_id,
@@ -3097,12 +3105,14 @@ class LbaasPoolTests(PoolTestBase):
                     self.assertEqual(resp.status_int,
                                      webob.exc.HTTPBadRequest.code)
 
+    @testtools.skip("HTTP_COOKIE is not supported in midonet")
     def test_create_pool_with_session_persistence(self):
         self.test_create_pool(session_persistence={'type': 'HTTP_COOKIE'})
 
     def test_create_pool_with_session_persistence_none(self):
         self.test_create_pool(session_persistence=None)
 
+    @testtools.skip("APP_COOKIE is not supported in midonet")
     def test_create_pool_with_session_persistence_with_app_cookie(self):
         sp = {'type': 'APP_COOKIE', 'cookie_name': 'sessionId'}
         self.test_create_pool(session_persistence=sp)
@@ -3116,28 +3126,32 @@ class LbaasPoolTests(PoolTestBase):
         with testtools.ExpectedException(webob.exc.HTTPClientError):
             self.test_create_pool(session_persistence=sp)
 
+    @testtools.skip("APP_COOKIE is not supported in midonet")
     def test_create_pool_with_session_persistence_without_cookie_name(self):
         sp = {'type': "APP_COOKIE"}
         with testtools.ExpectedException(webob.exc.HTTPClientError):
             self.test_create_pool(session_persistence=sp)
 
+    @testtools.skip("APP_COOKIE is not supported in midonet")
     def test_validate_session_persistence_valid_with_cookie_name(self):
         sp = {'type': 'APP_COOKIE', 'cookie_name': 'MyCookie'}
         self.assertIsNone(
             self.plugin._validate_session_persistence_info(sp_info=sp))
 
     def test_validate_session_persistence_invalid_with_cookie_name(self):
-        sp = {'type': 'HTTP', 'cookie_name': 'MyCookie'}
+        sp = {'type': 'TCP', 'cookie_name': 'MyCookie'}
         with testtools.ExpectedException(
                 loadbalancerv2.SessionPersistenceConfigurationInvalid):
             self.plugin._validate_session_persistence_info(sp_info=sp)
 
+    @testtools.skip("APP_COOKIE is not supported in midonet")
     def test_validate_session_persistence_invalid_without_cookie_name(self):
         sp = {'type': 'APP_COOKIE'}
         with testtools.ExpectedException(
                 loadbalancerv2.SessionPersistenceConfigurationInvalid):
             self.plugin._validate_session_persistence_info(sp_info=sp)
 
+    @testtools.skip("HTTP_COOKIE is not supported in midonet")
     def test_reset_session_persistence(self):
         name = 'pool4'
         sp = {'type': "HTTP_COOKIE"}
@@ -3157,6 +3171,7 @@ class LbaasPoolTests(PoolTestBase):
 
             self.assertIsNone(body['pool'].get('session_persistence'))
 
+    @testtools.skip("HTTP_COOKIE is not supported in midonet")
     def test_update_no_change_session_persistence(self):
         name = 'pool4'
         sp = {'type': "HTTP_COOKIE"}
@@ -3184,10 +3199,11 @@ class LbaasPoolTests(PoolTestBase):
             resp, body = self._update_pool_api(pool_id, data)
             self.assertEqual(webob.exc.HTTPBadRequest.code, resp.status_int)
 
+    @testtools.skip("HTTP_COOKIE is not supported in midonet")
     def test_list_pools(self):
         name = 'list_pools'
         expected_values = {'name': name,
-                           'protocol': 'HTTP',
+                           'protocol': 'TCP',
                            'description': 'apool',
                            'lb_algorithm': 'ROUND_ROBIN',
                            'admin_state_up': True,
@@ -3209,6 +3225,7 @@ class LbaasPoolTests(PoolTestBase):
             for k in expected_values:
                 self.assertEqual(expected_values[k], pool_list[0][k])
 
+    @testtools.skip("HTTPS is not supported in midonet")
     def test_list_pools_with_sort_emulated(self):
         with self.listener(loadbalancer_id=self.lb_id,
                            protocol_port=81,
@@ -3228,6 +3245,7 @@ class LbaasPoolTests(PoolTestBase):
             self._test_list_with_sort('pool', (p2, p1, p3),
                                       [('protocol', 'desc')])
 
+    @testtools.skip("HTTPS is not supported in midonet")
     def test_list_pools_with_pagination_emulated(self):
         with self.listener(loadbalancer_id=self.lb_id,
                            protocol_port=81,
@@ -3248,6 +3266,7 @@ class LbaasPoolTests(PoolTestBase):
                                             (p3, p1, p2),
                                             ('protocol', 'asc'), 2, 2)
 
+    @testtools.skip("HTTPS is not supported in midonet")
     def test_list_pools_with_pagination_reverse_emulated(self):
         with self.listener(loadbalancer_id=self.lb_id,
                            protocol_port=81,
@@ -3280,27 +3299,27 @@ class MemberTestBase(PoolTestBase):
     def setUp(self):
         super(MemberTestBase, self).setUp()
         pool_res = self._create_pool(
-            self.fmt, lb_const.PROTOCOL_HTTP,
+            self.fmt, lb_const.PROTOCOL_TCP,
             lb_const.LB_METHOD_ROUND_ROBIN,
             self.listener_id,
             self.lb_id,
             session_persistence={'type':
-                                 lb_const.SESSION_PERSISTENCE_HTTP_COOKIE})
+                                 lb_const.SESSION_PERSISTENCE_SOURCE_IP})
         self.pool = self.deserialize(self.fmt, pool_res)
         self.pool_id = self.pool['pool']['id']
         alt_listener_res = self._create_listener(
-            self.fmt, lb_const.PROTOCOL_HTTP,
+            self.fmt, lb_const.PROTOCOL_TCP,
             self.def_listener['listener']['protocol_port'] + 1,
             self.lb_id
         )
         self.alt_listener = self.deserialize(self.fmt, alt_listener_res)
         self.alt_listener_id = self.alt_listener['listener']['id']
         alt_pool_res = self._create_pool(
-            self.fmt, lb_const.PROTOCOL_HTTP,
+            self.fmt, lb_const.PROTOCOL_TCP,
             lb_const.LB_METHOD_ROUND_ROBIN,
             self.alt_listener_id,
             session_persistence={'type':
-                                 lb_const.SESSION_PERSISTENCE_HTTP_COOKIE})
+                                 lb_const.SESSION_PERSISTENCE_SOURCE_IP})
         self.alt_pool = self.deserialize(self.fmt, alt_pool_res)
         self.alt_pool_id = self.alt_pool['pool']['id']
 
@@ -3604,13 +3623,13 @@ class TestLbaasHealthMonitorTests(HealthMonitorTestBase):
 
     def test_create_healthmonitor(self, **extras):
         expected = {
-            'type': 'HTTP',
+            'type': 'TCP',
             'delay': 1,
             'timeout': 1,
             'max_retries': 2,
-            'http_method': 'GET',
-            'url_path': '/',
-            'expected_codes': '200',
+            # 'http_method': 'GET',
+            # 'url_path': '/',
+            # 'expected_codes': '200',
             'admin_state_up': True,
             'tenant_id': self._tenant_id,
             'pools': [{'id': self.pool_id}],
@@ -3619,7 +3638,7 @@ class TestLbaasHealthMonitorTests(HealthMonitorTestBase):
 
         expected.update(extras)
 
-        with self.healthmonitor(pool_id=self.pool_id, type='HTTP',
+        with self.healthmonitor(pool_id=self.pool_id, type='TCP',
                                 name='monitor1', **extras) as healthmonitor:
             hm_id = healthmonitor['healthmonitor'].get('id')
             self.assertTrue(hm_id)
@@ -3634,20 +3653,20 @@ class TestLbaasHealthMonitorTests(HealthMonitorTestBase):
                                     hm_id=hm_id)
             _, pool = self._get_pool_api(self.pool_id)
             self.assertEqual(
-                {'type': lb_const.SESSION_PERSISTENCE_HTTP_COOKIE,
+                {'type': lb_const.SESSION_PERSISTENCE_SOURCE_IP,
                  'cookie_name': None},
                 pool['pool'].get('session_persistence'))
         return healthmonitor
 
     def test_show_healthmonitor(self, **extras):
         expected = {
-            'type': 'HTTP',
+            'type': 'TCP',
             'delay': 1,
             'timeout': 1,
             'max_retries': 2,
-            'http_method': 'GET',
-            'url_path': '/',
-            'expected_codes': '200',
+            # 'http_method': 'GET',
+            # 'url_path': '/',
+            # 'expected_codes': '200',
             'admin_state_up': True,
             'tenant_id': self._tenant_id,
             'pools': [{'id': self.pool_id}],
@@ -3656,7 +3675,7 @@ class TestLbaasHealthMonitorTests(HealthMonitorTestBase):
 
         expected.update(extras)
 
-        with self.healthmonitor(pool_id=self.pool_id, type='HTTP',
+        with self.healthmonitor(pool_id=self.pool_id, type='TCP',
                                 name='monitor1') as healthmonitor:
             hm_id = healthmonitor['healthmonitor']['id']
             resp, body = self._get_healthmonitor_api(hm_id)
@@ -3670,13 +3689,13 @@ class TestLbaasHealthMonitorTests(HealthMonitorTestBase):
 
     def test_update_healthmonitor(self, **extras):
         expected = {
-            'type': 'HTTP',
+            'type': 'TCP',
             'delay': 30,
             'timeout': 10,
             'max_retries': 4,
-            'http_method': 'GET',
-            'url_path': '/index.html',
-            'expected_codes': '200,404',
+            # 'http_method': 'GET',
+            # 'url_path': '/index.html',
+            # 'expected_codes': '200,404',
             'admin_state_up': True,
             'tenant_id': self._tenant_id,
             'pools': [{'id': self.pool_id}],
@@ -3685,7 +3704,7 @@ class TestLbaasHealthMonitorTests(HealthMonitorTestBase):
 
         expected.update(extras)
 
-        with self.healthmonitor(pool_id=self.pool_id, type='HTTP',
+        with self.healthmonitor(pool_id=self.pool_id, type='TCP',
                                 name='monitor1') as healthmonitor:
             hm_id = healthmonitor['healthmonitor']['id']
             data = {'healthmonitor': {'delay': 30,
@@ -3803,7 +3822,7 @@ class TestLbaasHealthMonitorTests(HealthMonitorTestBase):
         return healthmonitor
 
     def test_create_health_monitor_with_timeout_invalid(self):
-        data = {'healthmonitor': {'type': 'HTTP',
+        data = {'healthmonitor': {'type': 'TCP',
                                   'delay': 1,
                                   'timeout': -1,
                                   'max_retries': 2,
@@ -3824,7 +3843,7 @@ class TestLbaasHealthMonitorTests(HealthMonitorTestBase):
             self.assertEqual(webob.exc.HTTPBadRequest.code, resp.status_int)
 
     def test_create_health_monitor_with_delay_invalid(self):
-        data = {'healthmonitor': {'type': 'HTTP',
+        data = {'healthmonitor': {'type': 'TCP',
                                   'delay': -1,
                                   'timeout': 1,
                                   'max_retries': 2,
@@ -3845,7 +3864,7 @@ class TestLbaasHealthMonitorTests(HealthMonitorTestBase):
             self.assertEqual(webob.exc.HTTPBadRequest.code, resp.status_int)
 
     def test_create_health_monitor_with_max_retries_invalid(self):
-        data = {'healthmonitor': {'type': 'HTTP',
+        data = {'healthmonitor': {'type': 'TCP',
                                   'delay': 1,
                                   'timeout': 1,
                                   'max_retries': 20,
@@ -3888,7 +3907,7 @@ class TestLbaasHealthMonitorTests(HealthMonitorTestBase):
             self.assertEqual(webob.exc.HTTPBadRequest.code, resp.status_int)
 
     def test_create_health_monitor_with_http_method_non_default(self):
-        data = {'healthmonitor': {'type': 'HTTP',
+        data = {'healthmonitor': {'type': 'TCP',
                                   'http_method': 'POST',
                                   'delay': 2,
                                   'timeout': 1,
@@ -3900,7 +3919,7 @@ class TestLbaasHealthMonitorTests(HealthMonitorTestBase):
         self._delete('healthmonitors', body['healthmonitor']['id'])
 
     def test_create_health_monitor_with_http_method_invalid(self):
-        data = {'healthmonitor': {'type': 'HTTP',
+        data = {'healthmonitor': {'type': 'TCP',
                                   'http_method': 'FOO',
                                   'delay': 1,
                                   'timeout': 1,
@@ -3914,7 +3933,7 @@ class TestLbaasHealthMonitorTests(HealthMonitorTestBase):
     def test_update_health_monitor_with_http_method_invalid(self):
         with self.healthmonitor(pool_id=self.pool_id) as healthmonitor:
             hm_id = healthmonitor['healthmonitor']['id']
-            data = {'healthmonitor': {'type': 'HTTP',
+            data = {'healthmonitor': {'type': 'TCP',
                                       'http_method': 'FOO',
                                       'delay': 1,
                                       'timeout': 1,
@@ -3924,7 +3943,7 @@ class TestLbaasHealthMonitorTests(HealthMonitorTestBase):
             self.assertEqual(webob.exc.HTTPBadRequest.code, resp.status_int)
 
     def test_create_health_monitor_with_url_path_non_default(self):
-        data = {'healthmonitor': {'type': 'HTTP',
+        data = {'healthmonitor': {'type': 'TCP',
                                   'url_path': '/a/b_c-d/e%20f',
                                   'delay': 2,
                                   'timeout': 1,
@@ -3936,7 +3955,7 @@ class TestLbaasHealthMonitorTests(HealthMonitorTestBase):
         self._delete('healthmonitors', body['healthmonitor']['id'])
 
     def test_create_health_monitor_with_url_path_invalid(self):
-        data = {'healthmonitor': {'type': 'HTTP',
+        data = {'healthmonitor': {'type': 'TCP',
                                   'url_path': 1,
                                   'delay': 1,
                                   'timeout': 1,
@@ -3981,13 +4000,13 @@ class TestLbaasHealthMonitorTests(HealthMonitorTestBase):
 
     def test_create_health_monitor_with_max_retries_down(self, **extras):
         expected = {
-            'type': 'HTTP',
+            'type': 'TCP',
             'delay': 1,
             'timeout': 1,
             'max_retries': 2,
-            'http_method': 'GET',
-            'url_path': '/',
-            'expected_codes': '200',
+            # 'http_method': 'GET',
+            # 'url_path': '/',
+            # 'expected_codes': '200',
             'admin_state_up': True,
             'tenant_id': self._tenant_id,
             'pools': [{'id': self.pool_id}],
@@ -3997,7 +4016,7 @@ class TestLbaasHealthMonitorTests(HealthMonitorTestBase):
 
         expected.update(extras)
 
-        with self.healthmonitor(pool_id=self.pool_id, type='HTTP',
+        with self.healthmonitor(pool_id=self.pool_id, type='TCP',
                                 name='monitor1', max_retries_down=1,
                                 **extras) as healthmonitor:
             hm_id = healthmonitor['healthmonitor'].get('id')
@@ -4013,7 +4032,7 @@ class TestLbaasHealthMonitorTests(HealthMonitorTestBase):
                                     hm_id=hm_id)
             _, pool = self._get_pool_api(self.pool_id)
             self.assertEqual(
-                {'type': lb_const.SESSION_PERSISTENCE_HTTP_COOKIE,
+                {'type': lb_const.SESSION_PERSISTENCE_SOURCE_IP,
                  'cookie_name': None},
                 pool['pool'].get('session_persistence'))
         return healthmonitor
@@ -4031,13 +4050,13 @@ class TestLbaasHealthMonitorTests(HealthMonitorTestBase):
 
     def test_get_healthmonitor(self):
         expected = {
-            'type': 'HTTP',
+            'type': 'TCP',
             'delay': 1,
             'timeout': 1,
             'max_retries': 2,
-            'http_method': 'GET',
-            'url_path': '/',
-            'expected_codes': '200',
+            # 'http_method': 'GET',
+            # 'url_path': '/',
+            # 'expected_codes': '200',
             'admin_state_up': True,
             'tenant_id': self._tenant_id,
             'pools': [{'id': self.pool_id}],
@@ -4045,7 +4064,7 @@ class TestLbaasHealthMonitorTests(HealthMonitorTestBase):
             'max_retries_down': 3
         }
 
-        with self.healthmonitor(pool_id=self.pool_id, type='HTTP',
+        with self.healthmonitor(pool_id=self.pool_id, type='TCP',
                                 name='monitor1') as healthmonitor:
             hm_id = healthmonitor['healthmonitor']['id']
             expected['id'] = hm_id
@@ -4054,13 +4073,13 @@ class TestLbaasHealthMonitorTests(HealthMonitorTestBase):
 
     def test_list_healthmonitors(self):
         expected = {
-            'type': 'HTTP',
+            'type': 'TCP',
             'delay': 1,
             'timeout': 1,
             'max_retries': 2,
-            'http_method': 'GET',
-            'url_path': '/',
-            'expected_codes': '200',
+            # 'http_method': 'GET',
+            # 'url_path': '/',
+            # 'expected_codes': '200',
             'admin_state_up': True,
             'tenant_id': self._tenant_id,
             'pools': [{'id': self.pool_id}],
@@ -4069,7 +4088,7 @@ class TestLbaasHealthMonitorTests(HealthMonitorTestBase):
         }
 
         with self.healthmonitor(pool_id=self.pool_id,
-                                type='HTTP') as healthmonitor:
+                                type='TCP') as healthmonitor:
             hm_id = healthmonitor['healthmonitor']['id']
             expected['id'] = hm_id
             resp, body = self._list_healthmonitors_api()
@@ -4129,6 +4148,7 @@ class LbaasStatusesTest(MemberTestBase):
                 count = self._countDisabledChildren(value, count)
         return count
 
+    @testtools.skip("HTTPS is not supported in midonet")
     def test_disable_trickles_down(self):
         lb_dict = self._create_new_populated_loadbalancer()
         lb_id = lb_dict['id']
@@ -4168,7 +4188,7 @@ class LbaasStatusesTest(MemberTestBase):
         lb_dict = self._create_new_populated_loadbalancer()
         lb_id = lb_dict['id']
         listener_id = lb_dict['listeners'][0]['id']
-        listener = 'listener_HTTP'
+        listener = 'listener_TCP'
         self._update_listener_api(listener_id,
                                   {'listener': {'admin_state_up': False}})
         statuses = self._get_loadbalancer_statuses_api(lb_id)[1]
@@ -4176,7 +4196,7 @@ class LbaasStatusesTest(MemberTestBase):
         self._update_listener_api(listener_id,
                                   {'listener': {'admin_state_up': True}})
         pool_id = lb_dict['listeners'][0]['pools'][0]['id']
-        pool = 'pool_HTTP'
+        pool = 'pool_TCP'
         member_id = lb_dict['listeners'][0]['pools'][0]['members'][0]['id']
         member = '127.0.0.1'
         self._update_member_api(pool_id, member_id,
@@ -4193,6 +4213,7 @@ class LbaasStatusesTest(MemberTestBase):
                                                      pool=pool,
                                                      member=member))
 
+    @testtools.skip("HTTPS is not supported in midonet")
     def test_that_failures_trickle_up_on_prov_errors(self):
         ctx = context.get_admin_context()
         ERROR = constants.ERROR
@@ -4218,6 +4239,7 @@ class LbaasStatusesTest(MemberTestBase):
         self._assertNotDegraded(self._traverse_statuses(statuses,
             listener='listener_HTTPS'))
 
+    @testtools.skip("HTTPS is not supported in midonet")
     def test_that_failures_trickle_up_on_non_ONLINE_prov_status(self):
         ctx = context.get_admin_context()
         lb_dict = self._create_new_populated_loadbalancer()
@@ -4242,6 +4264,7 @@ class LbaasStatusesTest(MemberTestBase):
         self._assertNotDegraded(self._traverse_statuses(statuses,
             listener='listener_HTTPS'))
 
+    @testtools.skip("HTTPS is not supported in midonet")
     def test_degraded_with_pool_error(self):
         ctx = context.get_admin_context()
         ERROR = constants.ERROR
@@ -4329,6 +4352,7 @@ class LbaasStatusesTest(MemberTestBase):
                         return copy.copy(member_obj)
         raise KeyError
 
+    @testtools.skip("HTTPS is not supported in midonet")
     def _create_new_populated_loadbalancer(self):
         oct4 = 1
         subnet_id = self.test_subnet_id

@@ -75,7 +75,7 @@ class TestLoadBalancerCallbacks(
             ctx.session.add(loadbalancers[i])
 
         listener0 = ldb.models.Listener(
-            id=uuidutils.generate_uuid(), protocol="HTTP",
+            id=uuidutils.generate_uuid(), protocol="TCP",
             loadbalancer_id=loadbalancers[0].id,
             provisioning_status=constants.ACTIVE, admin_state_up=True,
             connection_limit=3, protocol_port=80,
@@ -84,7 +84,7 @@ class TestLoadBalancerCallbacks(
         loadbalancers[0].listener_id = listener0.id
 
         listener1 = ldb.models.Listener(
-            id=uuidutils.generate_uuid(), protocol="HTTP",
+            id=uuidutils.generate_uuid(), protocol="TCP",
             loadbalancer_id=loadbalancers[1].id,
             provisioning_status=constants.ACTIVE, admin_state_up=True,
             connection_limit=3, protocol_port=80,

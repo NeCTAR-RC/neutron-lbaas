@@ -17,6 +17,7 @@ import copy
 import mock
 from neutron_lib.plugins import directory
 import re
+import testtools
 
 from neutron import context
 from neutron.plugins.common import constants
@@ -134,7 +135,7 @@ LISTENER = {
     'id': None,
     'admin_state_up': True,
     'protocol_port': 80,
-    'protocol': lb_con.PROTOCOL_HTTP,
+    'protocol': lb_con.PROTOCOL_TCP,
     'default_pool': None,
     'connection_limit': -1,
     'l7_policies': []}
@@ -179,7 +180,7 @@ SNI_CERTIFICATE = {
 
 POOL = {
     'id': None,
-    'protocol': lb_con.PROTOCOL_HTTP,
+    'protocol': lb_con.PROTOCOL_TCP,
     'lb_algorithm': 'ROUND_ROBIN',
     'admin_state_up': True,
     'members': []}
@@ -197,7 +198,7 @@ MEMBER = {
 HM = {
     'id': None,
     'expected_codes': '200',
-    'type': 'HTTP',
+    'type': 'TCP',
     'delay': 1,
     'timeout': 1,
     'max_retries': 1,
@@ -291,7 +292,7 @@ class TestLBaaSDriver(TestLBaaSDriverBase):
             yield lb
 
     @contextlib.contextmanager
-    def listener(self, fmt=None, protocol='HTTP', loadbalancer_id=None,
+    def listener(self, fmt=None, protocol='TCP', loadbalancer_id=None,
                  protocol_port=80, default_pool_id=None, no_delete=False,
                  **kwargs):
         with super(TestLBaaSDriver, self).listener(
@@ -351,7 +352,7 @@ class TestLBaaSDriver(TestLBaaSDriverBase):
             yield rule
 
     @contextlib.contextmanager
-    def pool(self, fmt=None, protocol='HTTP', lb_algorithm='ROUND_ROBIN',
+    def pool(self, fmt=None, protocol='TCP', lb_algorithm='ROUND_ROBIN',
              no_delete=False, listener_id=None,
              loadbalancer_id=None, **kwargs):
         with super(TestLBaaSDriver, self).pool(
@@ -544,7 +545,7 @@ class TestLBaaSDriver(TestLBaaSDriverBase):
                 with self.listener(loadbalancer_id=lb_id) as l:
                     listener_id = l['listener']['id']
                     with self.pool(
-                        protocol=lb_con.PROTOCOL_HTTP,
+                        protocol=lb_con.PROTOCOL_TCP,
                         listener_id=listener_id) as p:
                         pool_id = p['pool']['id']
                         self.driver_rest_call_mock.reset_mock()
@@ -564,7 +565,7 @@ class TestLBaaSDriver(TestLBaaSDriverBase):
                 with self.listener(
                     loadbalancer_id=lb['loadbalancer']['id']) as listener:
                     with self.pool(
-                        protocol=lb_con.PROTOCOL_HTTP,
+                        protocol=lb_con.PROTOCOL_TCP,
                         listener_id=listener['listener']['id']) as pool:
                         with self.member(pool_id=pool['pool']['id'],
                                          subnet=vip_sub, address='10.0.1.10'):
@@ -588,7 +589,7 @@ class TestLBaaSDriver(TestLBaaSDriverBase):
                 lb_id = lb['loadbalancer']['id']
                 with self.listener(loadbalancer_id=lb_id) as l:
                     with self.pool(
-                        protocol=lb_con.PROTOCOL_HTTP,
+                        protocol=lb_con.PROTOCOL_TCP,
                         listener_id=l['listener']['id']) as p:
 
                         self.plugin_instance.update_loadbalancer(
@@ -637,7 +638,7 @@ class TestLBaaSDriver(TestLBaaSDriverBase):
                 lb_id = lb['loadbalancer']['id']
                 with self.listener(loadbalancer_id=lb_id) as l:
                     with self.pool(
-                        protocol=lb_con.PROTOCOL_HTTP,
+                        protocol=lb_con.PROTOCOL_TCP,
                         listener_id=l['listener']['id']) as p:
                         with self.member(
                             no_delete=True, pool_id=p['pool']['id'],
@@ -660,7 +661,7 @@ class TestLBaaSDriver(TestLBaaSDriverBase):
                 with self.listener(loadbalancer_id=lb_id) as l:
                     listener_id = l['listener']['id']
                     with self.pool(
-                        protocol=lb_con.PROTOCOL_HTTP,
+                        protocol=lb_con.PROTOCOL_TCP,
                         listener_id=listener_id) as p:
                         pool_id = p['pool']['id']
                         with self.member(
@@ -706,6 +707,7 @@ class TestLBaaSDriver(TestLBaaSDriverBase):
                                 self.assertEqual('ACTIVE',
                                              lb['provisioning_status'])
 
+    @testtools.skip("HTTPS not supported in midonet")
     def test_build_objects_with_tls(self):
         with self.subnet(cidr='10.0.0.0/24') as vip_sub:
             with self.loadbalancer(subnet=vip_sub) as lb:
@@ -743,12 +745,12 @@ class TestLBaaSDriver(TestLBaaSDriverBase):
             with self.loadbalancer(subnet=vip_sub) as lb:
                 lb_id = lb['loadbalancer']['id']
                 with self.listener(
-                    protocol=lb_con.PROTOCOL_HTTP,
+                    protocol=lb_con.PROTOCOL_TCP,
                     loadbalancer_id=lb_id) as listener:
                     listener_id = listener['listener']['id']
-                    with self.pool(protocol=lb_con.PROTOCOL_HTTP,
+                    with self.pool(protocol=lb_con.PROTOCOL_TCP,
                                    listener_id=listener_id) as def_pool, \
-                            self.pool(protocol=lb_con.PROTOCOL_HTTP,
+                            self.pool(protocol=lb_con.PROTOCOL_TCP,
                                       loadbalancer_id=lb_id) as pol_pool:
                         def_pool_id = def_pool['pool']['id']
                         pol_pool_id = pol_pool['pool']['id']
@@ -786,7 +788,7 @@ class TestLBaaSDriver(TestLBaaSDriverBase):
                 with self.listener(loadbalancer_id=lb_id) as listener:
                     listener_id = listener['listener']['id']
                     with self.pool(
-                        protocol=lb_con.PROTOCOL_HTTP,
+                        protocol=lb_con.PROTOCOL_TCP,
                         listener_id=listener_id) as pool:
                         with self.member(pool_id=pool['pool']['id'],
                                          subnet=vip_sub,
@@ -799,7 +801,7 @@ class TestLBaaSDriver(TestLBaaSDriverBase):
                                 {'WORKFLOW_MISSING': False})
 
                             with self.pool(
-                                protocol=lb_con.PROTOCOL_HTTP,
+                                protocol=lb_con.PROTOCOL_TCP,
                                 loadbalancer_id=lb_id):
                                 self.compare_apply_call()
 
@@ -810,7 +812,7 @@ class TestLBaaSDriver(TestLBaaSDriverBase):
                 with self.listener(loadbalancer_id=lb_id) as listener:
                     listener_id = listener['listener']['id']
                     with self.pool(
-                        protocol='HTTP',
+                        protocol='TCP',
                         listener_id=listener_id) as pool:
                         with self.member(pool_id=pool['pool']['id'],
                                          subnet=vip_sub,
@@ -820,6 +822,7 @@ class TestLBaaSDriver(TestLBaaSDriverBase):
                                             address='10.0.1.20'):
                             self.compare_apply_call()
 
+    @testtools.skip("APP_COOKIE is not supported in midonet")
     def test_build_objects_graph_two_legs_full(self):
         with self.subnet(cidr='10.0.0.0/24') as vip_sub, \
                 self.subnet(cidr='20.0.0.0/24') as member_sub1, \
@@ -828,13 +831,13 @@ class TestLBaaSDriver(TestLBaaSDriverBase):
                 lb_id = lb['loadbalancer']['id']
                 with self.listener(loadbalancer_id=lb_id) as listener:
                     with self.pool(
-                        protocol='HTTP',
+                        protocol='TCP',
                         listener_id=listener['listener']['id'],
                         session_persistence={
                             'type': "APP_COOKIE",
                             'cookie_name': 'sessionId'}) as pool:
                         with self.healthmonitor(
-                            type='HTTP', pool_id=pool['pool']['id']):
+                            type='TCP', pool_id=pool['pool']['id']):
 
                             self.driver_rest_call_mock.reset_mock()
 
@@ -866,7 +869,7 @@ class TestLBaaSDriver(TestLBaaSDriverBase):
                 lb_id = lb['loadbalancer']['id']
                 with self.listener(loadbalancer_id=lb_id) as listener:
                     with self.pool(
-                        protocol='HTTP',
+                        protocol='TCP',
                         listener_id=listener['listener']['id'],
                         no_delete=True) as p:
 
@@ -932,7 +935,7 @@ class TestLBaaSDriverDebugOptions(TestLBaaSDriverBase):
                 lb_id = lb['loadbalancer']['id']
                 with self.listener(loadbalancer_id=lb_id) as l:
                     with self.pool(
-                        protocol='HTTP',
+                        protocol='TCP',
                         listener_id=l['listener']['id']) as p:
                         with self.member(
                             pool_id=p['pool']['id'],

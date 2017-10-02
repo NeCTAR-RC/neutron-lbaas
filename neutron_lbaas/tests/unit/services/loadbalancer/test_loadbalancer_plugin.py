@@ -14,6 +14,7 @@
 #  under the License.
 
 import copy
+import testtools
 
 import mock
 from neutron.plugins.common import constants
@@ -217,7 +218,7 @@ class TestLoadBalancerExtensionV2TestCase(base.ExtensionTestCase):
                              'project_id': project_id,
                              'name': 'listen-name-1',
                              'description': 'listen-1-desc',
-                             'protocol': 'HTTP',
+                             'protocol': 'TCP',
                              'protocol_port': 80,
                              'default_pool_id': None,
                              'default_tls_container_ref': None,
@@ -243,6 +244,7 @@ class TestLoadBalancerExtensionV2TestCase(base.ExtensionTestCase):
         self.assertIn('listener', res)
         self.assertEqual(return_value, res['listener'])
 
+    @testtools.skip("HTTPS is not supported in midonet")
     def test_listener_create_with_tls(self):
         listener_id = _uuid()
         project_id = _uuid()
@@ -285,7 +287,7 @@ class TestLoadBalancerExtensionV2TestCase(base.ExtensionTestCase):
                              'project_id': project_id,
                              'name': 'listen-name-1',
                              'description': 'listen-1-desc',
-                             'protocol': 'HTTP',
+                             'protocol': 'TCP',
                              'protocol_port': 80,
                              'default_tls_container_ref': None,
                              'sni_container_refs': [],
@@ -405,7 +407,7 @@ class TestLoadBalancerExtensionV2TestCase(base.ExtensionTestCase):
         project_id = _uuid()
         data = {'pool': {'name': 'pool1',
                          'description': 'descr_pool1',
-                         'protocol': 'HTTP',
+                         'protocol': 'TCP',
                          'lb_algorithm': 'ROUND_ROBIN',
                          'admin_state_up': True,
                          'loadbalancer_id': _uuid(),
@@ -599,7 +601,7 @@ class TestLoadBalancerExtensionV2TestCase(base.ExtensionTestCase):
     def test_health_monitor_create(self):
         health_monitor_id = _uuid()
         project_id = _uuid()
-        data = {'healthmonitor': {'type': 'HTTP',
+        data = {'healthmonitor': {'type': 'TCP',
                                   'delay': 2,
                                   'timeout': 1,
                                   'max_retries': 3,
@@ -631,7 +633,7 @@ class TestLoadBalancerExtensionV2TestCase(base.ExtensionTestCase):
 
     def test_health_monitor_create_with_timeout_negative(self):
         project_id = _uuid()
-        data = {'healthmonitor': {'type': 'HTTP',
+        data = {'healthmonitor': {'type': 'TCP',
                                   'delay': 2,
                                   'timeout': -1,
                                   'max_retries': 3,
@@ -652,7 +654,7 @@ class TestLoadBalancerExtensionV2TestCase(base.ExtensionTestCase):
 
     def test_health_monitor_list(self):
         health_monitor_id = _uuid()
-        return_value = [{'type': 'HTTP',
+        return_value = [{'type': 'TCP',
                          'admin_state_up': True,
                          'project_id': _uuid(),
                          'id': health_monitor_id,
@@ -670,7 +672,7 @@ class TestLoadBalancerExtensionV2TestCase(base.ExtensionTestCase):
     def test_health_monitor_update(self):
         health_monitor_id = _uuid()
         update_data = {'healthmonitor': {'admin_state_up': False}}
-        return_value = {'type': 'HTTP',
+        return_value = {'type': 'TCP',
                         'admin_state_up': False,
                         'project_id': _uuid(),
                         'id': health_monitor_id,
@@ -693,7 +695,7 @@ class TestLoadBalancerExtensionV2TestCase(base.ExtensionTestCase):
 
     def test_health_monitor_get(self):
         health_monitor_id = _uuid()
-        return_value = {'type': 'HTTP',
+        return_value = {'type': 'TCP',
                         'admin_state_up': False,
                         'project_id': _uuid(),
                         'id': health_monitor_id,
