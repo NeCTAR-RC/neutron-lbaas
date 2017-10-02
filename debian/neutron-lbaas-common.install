@@ -1,0 +1,2 @@
+etc/lbaas_agent.ini etc/neutron
+etc/neutron/rootwrap.d/lbaas-haproxy.filters etc/neutron/rootwrap.d

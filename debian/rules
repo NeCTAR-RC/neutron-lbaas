@@ -1,0 +1,42 @@
+#!/usr/bin/make -f
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+export OSLO_PACKAGE_VERSION=$(shell dpkg-parsechangelog | sed -n -e 's/^Version: //p')
+
+include /usr/share/openstack-pkg-tools/pkgos.make
+
+DEBVERS ?= $(shell dpkg-parsechangelog | sed -n -e 's/^Version: //p')
+VERSION ?= $(shell echo '$(DEBVERS)' | sed -e 's/^[[:digit:]]*://' -e 's/[-].*//' -e 's/~/./g')
+export PBR_VERSION=$(VERSION)
+
+
+%:
+	dh $@ --with python2,systemd --buildsystem=python_distutils
+
+override_dh_install:
+	PYTHONPATH=$(CURDIR) $(CURDIR)/tools/generate_config_file_samples.sh
+	find $(CURDIR)/etc -type f | xargs rename 's/\.sample$$//'
+	dh_install
+
+# NOTE(jamespage): Some tests need access to /etc/neutron/neutron.conf,
+#                  skip these as this file will contain access credentials
+#                  so is not world readable.
+# neutron_lbaas.tests.unit.agent.test_agent.TestLbaasService.test_main
+# neutron_lbaas.tests.unit.common.tls_utils.test_cert_parser.TestTLSParseUtils.test_read_private_key
+# neutron_lbaas.tests.unit.services.loadbalancer.agent.test_agent.TestLbaasService.test_main
+SKIPTEST := (?!.*TestTLSParseUtils.test_read_private_key.*)(?!.*TestLbaasService.test_main.*)
+ifeq (,$(findstring nocheck, $(DEB_BUILD_OPTIONS)))
+override_dh_auto_test:
+	rm -rf .testrepository
+	testr init && \
+	set -e && \
+	TEMP_REZ=`mktemp -t` && \
+	PYTHONPATH=$(CURDIR) testr run --subunit 'neutron_lbaas\.tests\.unit\.$(SKIPTEST)' | tee $$TEMP_REZ | subunit2pyunit; \
+	rm -f $$TEMP_REZ ;
+endif
+
+override_dh_auto_clean:
+	dh_auto_clean
+	rm -rf .testrepository
+	rm -f debian/*.upstart debian/*.init debian/*.service

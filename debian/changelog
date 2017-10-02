@@ -1,0 +1,271 @@
+neutron-lbaas (2:10.0.1-0ubuntu1~cloud0) xenial-ocata; urgency=medium
+
+  * New upstream release for the Ubuntu Cloud Archive.
+
+ -- Openstack Ubuntu Testing Bot <openstack-testing-bot@ubuntu.com>  Fri, 28 Jul 2017 14:30:28 +0000
+
+neutron-lbaas (2:10.0.1-0ubuntu1) zesty; urgency=medium
+
+  * New stable point release for OpenStack Ocata (LP: #1706297).
+
+ -- James Page <james.page@ubuntu.com>  Tue, 25 Jul 2017 16:37:32 +0100
+
+neutron-lbaas (2:10.0.0-0ubuntu2) zesty; urgency=medium
+
+  * debian/neutron-lbaas-common.install: Remove cron jobs since
+    it will cause a race with L3 agents and neutron. (LP: #1623664) 
+  * d/control: Remove duplicate depenendency.
+
+ -- Chuck Short <zulcss@ubuntu.com>  Mon, 27 Mar 2017 13:04:16 -0400
+
+neutron-lbaas (2:10.0.0-0ubuntu1) zesty; urgency=medium
+
+  * New upstream release for OpenStack Ocata.
+
+ -- Corey Bryant <corey.bryant@canonical.com>  Wed, 22 Feb 2017 10:27:28 -0500
+
+neutron-lbaas (2:10.0.0~rc1-0ubuntu1) zesty; urgency=medium
+
+  * New upstream milestone for Ocata. 
+
+ -- Chuck Short <zulcss@ubuntu.com>  Mon, 06 Feb 2017 12:31:35 -0500
+
+neutron-lbaas (2:10.0.0~b3-0ubuntu1) zesty; urgency=medium
+
+  * New upstream release.
+  * d/control: Align (Build-)Depends with upstream.
+
+ -- Chuck Short <zulcss@ubuntu.com>  Mon, 30 Jan 2017 08:19:53 -0500
+
+neutron-lbaas (2:10.0.0~b2-0ubuntu1) zesty; urgency=medium
+
+  [ Chuck Short ]
+  * debian/rules: Add PBR_VERSION to set correct version for 
+    package builds. 
+
+  [ Corey Bryant ]
+  * New upstream milestone for OpenStack Ocata.
+  * d/control: Align (Build-)Depends with upstream.
+
+ -- Corey Bryant <corey.bryant@canonical.com>  Mon, 19 Dec 2016 07:57:09 -0500
+
+neutron-lbaas (2:10.0.0~b1-0ubuntu1) zesty; urgency=medium
+
+  * New upstream milestone for OpenStack Ocata.
+  * d/control: Align (build-)depends with upstream.
+
+ -- David Della Vecchia <ddv@canonical.com>  Thu, 17 Nov 2016 08:51:22 -0500
+
+neutron-lbaas (2:9.0.0-0ubuntu1) yakkety; urgency=medium
+
+  * d/control: oslo.log min version level in global-requirements is too low,
+    so set min version to upper-constraints level (LP: #1628883).
+  * New upstream release for OpenStack Newton.
+  * d/control: Align python-neutron with Newton final release.
+
+ -- Corey Bryant <corey.bryant@canonical.com>  Thu, 06 Oct 2016 15:59:04 -0400
+
+neutron-lbaas (2:9.0.0~rc2-0ubuntu1) yakkety; urgency=medium
+
+  * New upstream release candidate for OpenStack Newton.
+
+ -- Corey Bryant <corey.bryant@canonical.com>  Wed, 28 Sep 2016 13:52:01 -0400
+
+neutron-lbaas (2:9.0.0~rc1-0ubuntu1) yakkety; urgency=medium
+
+  * New upstream release candidate for OpenStack Newton.
+
+ -- James Page <james.page@ubuntu.com>  Mon, 19 Sep 2016 11:59:42 +0100
+
+neutron-lbaas (2:9.0.0~b3-0ubuntu1) yakkety; urgency=medium
+
+  [ James Page ]
+  * New upstream release.
+  * d/control,neutron-lbaas-agent.*: Drop v1 agent package as v1 has now
+    been removed from upstream.
+
+  [ David Della Vecchia ]
+  * New upstream milestone for OpenStack Newton.
+  * d/control: Align (build-)depends with upstream.
+
+ -- David Della Vecchia <ddv@canonical.com>  Fri, 02 Sep 2016 08:36:55 -0400
+
+neutron-lbaas (2:9.0.0~b2-0ubuntu1) yakkety; urgency=medium
+
+  * New upstream milestone for OpenStack Newton.
+  * d/control: Align (Build-)Depends with upstream.
+
+ -- Corey Bryant <corey.bryant@canonical.com>  Thu, 14 Jul 2016 14:03:26 -0400
+
+neutron-lbaas (2:9.0.0~b1-0ubuntu1) yakkety; urgency=medium
+
+  * New upstream milestone for OpenStack Newton.
+  * d/control: Align (Build-)Depends with upstream.
+
+ -- David Della Vecchia <ddv@canonical.com>  Mon, 06 Jun 2016 17:08:51 -0400
+
+neutron-lbaas (2:8.0.0-0ubuntu1) xenial; urgency=medium
+
+  * New upstream release for OpenStack Mitaka.
+  * d/control: Set min python-neutron BD to 2:8.0.0.
+
+ -- Corey Bryant <corey.bryant@canonical.com>  Thu, 07 Apr 2016 15:55:37 -0400
+
+neutron-lbaas (2:8.0.0~rc1-0ubuntu1) xenial; urgency=medium
+
+  * New upstream release candidate for OpenStack Mitaka.
+  * d/control: Align (Build-)Depends with upstream.
+
+ -- Corey Bryant <corey.bryant@canonical.com>  Thu, 24 Mar 2016 09:40:37 -0400
+
+neutron-lbaas (2:8.0.0~b3-0ubuntu1) xenial; urgency=medium
+
+  * New upstream milestone for OpenStack Mitaka.
+  * d/control: Align (Build-)Depends with upstream.
+  * d/p/skip-failing-tests.patch: Rebased.
+
+ -- Corey Bryant <corey.bryant@canonical.com>  Tue, 08 Mar 2016 14:46:12 -0500
+
+neutron-lbaas (2:8.0.0~b2-0ubuntu1) xenial; urgency=medium
+
+  * New upstream milestone for OpenStack Mitaka.
+  * d/control: Align (build-)depends with upstream.
+  * d/p/skip-failing-tests.patch: Rebased.
+  * d/rules: Generate config files with generate_config_file_samples.sh.
+
+ -- Corey Bryant <corey.bryant@canonical.com>  Wed, 27 Jan 2016 10:36:21 +0100
+
+neutron-lbaas (2:8.0.0~b1-0ubuntu2) xenial; urgency=medium
+
+  * No change rebuild with neutron 8.0.0~b1-0ubuntu1.
+
+ -- Corey Bryant <corey.bryant@canonical.com>  Sun, 20 Dec 2015 14:33:56 -0500
+
+neutron-lbaas (2:8.0.0~b1-0ubuntu1) xenial; urgency=medium
+
+  * New upstream milestone for OpenStack Mitaka.
+  * d/control: Align (build-)depends with upstream.
+
+ -- Corey Bryant <corey.bryant@canonical.com>  Thu, 17 Dec 2015 10:29:41 -0500
+
+neutron-lbaas (2:7.0.0-0ubuntu1) wily; urgency=medium
+
+  * New upstream release for OpenStack Liberty.
+  * d/control: Add neutron-lbaasv2-agent binary (LP: #1504367).
+  * d/neutron-lbaasv2-agent.in*: Added for neutron-lbaasv2-agent.
+  * d/control: Add neutron-lbaas-common binary package.
+  * d/neutron-lbaas*.install: Move common install files to
+    neutron-lbaas-common.install
+
+ -- Corey Bryant <corey.bryant@canonical.com>  Thu, 15 Oct 2015 16:43:36 -0400
+
+neutron-lbaas (2:7.0.0~rc2-0ubuntu1) wily; urgency=medium
+
+  * New upstream release candidate for OpenStack Liberty.
+
+ -- Corey Bryant <corey.bryant@canonical.com>  Thu, 08 Oct 2015 09:54:21 -0400
+
+neutron-lbaas (2:7.0.0~rc1-0ubuntu1) wily; urgency=medium
+
+  * d/watch: Update to cope with upstream rc versioning.
+  * New upstream release candidate for OpenStack Liberty.
+  * d/rules: Drop removal of .eggs directory in override_dh_auto_clean.
+  * d/control: Bump minimum pbr version to 1.8.
+  * d/control: Align dependencies with upstream.
+
+ -- Corey Bryant <corey.bryant@canonical.com>  Mon, 28 Sep 2015 14:19:39 -0400
+
+neutron-lbaas (2:7.0.0~b3-0ubuntu2) wily; urgency=medium
+
+  * Move neutron_lbaas.conf and services_lbaas.conf to python-neutron-lbaas
+    for use across agent and central neutron-server processes.
+
+ -- James Page <james.page@ubuntu.com>  Mon, 14 Sep 2015 16:28:34 +0100
+
+neutron-lbaas (2:7.0.0~b3-0ubuntu1) wily; urgency=medium
+
+  * New upstream milestone for OpenStack Liberty.
+  * d/control: Align (build-)depends with upstream.
+
+ -- Corey Bryant <corey.bryant@canonical.com>  Tue, 08 Sep 2015 16:00:46 -0400
+
+neutron-lbaas (2:7.0.0~b2-0ubuntu1) wily; urgency=medium
+
+  * New upstream milestone for OpenStack Liberty.
+  * d/control: Align (build-)depends with upstream.
+  * d/rules: Remove .eggs directory in override_dh_auto_clean.
+
+ -- Corey Bryant <corey.bryant@canonical.com>  Wed, 19 Aug 2015 14:26:04 -0400
+
+neutron-lbaas (2:7.0.0~b1-0ubuntu4) wily; urgency=medium
+
+  * d/neutron-lbaas-agent.install: Install missing configuration files
+    (LP: #1460228).
+
+ -- James Page <james.page@ubuntu.com>  Fri, 24 Jul 2015 12:18:34 +0100
+
+neutron-lbaas (2:7.0.0~b1-0ubuntu3) wily; urgency=medium
+
+  * No change rebuild with SQLAlchemy 1.0.6.
+
+ -- James Page <james.page@ubuntu.com>  Fri, 24 Jul 2015 11:25:45 +0100
+
+neutron-lbaas (2:7.0.0~b1-0ubuntu2) wily; urgency=medium
+
+  * Switch neutron-common -> python-neutron as BD for testing.
+  * Ignore broken dependency generation for oslo.messaging_.
+
+ -- James Page <james.page@ubuntu.com>  Wed, 08 Jul 2015 13:33:29 +0100
+
+neutron-lbaas (2:7.0.0~b1-0ubuntu1) wily; urgency=medium
+
+  * New upstream milestone for OpenStack Liberty.
+  * Align (build)-depends with upstream.
+
+ -- James Page <james.page@ubuntu.com>  Mon, 29 Jun 2015 10:07:38 +0100
+
+neutron-lbaas (1:2015.1.0-0ubuntu1) vivid; urgency=medium
+
+  * New upstream release for OpenStack Kilo. (LP: #1449744) 
+
+ -- Chuck Short <zulcss@ubuntu.com>  Thu, 30 Apr 2015 17:35:09 +0200
+
+neutron-lbaas (1:2015.1~rc1-0ubuntu1) vivid; urgency=medium
+
+  * New upstream milestone release:
+    - d/control: Align version requirements with upstream.
+    - debian/patches/skip-failing-tests.patch: Skipped failing tests.
+
+ -- Chuck Short <zulcss@ubuntu.com>  Fri, 10 Apr 2015 09:59:17 -0400
+
+neutron-lbaas (1:2015.1~b3-0ubuntu1) vivid; urgency=medium
+
+  * New upstream milestone release:
+    - d/control: Align version requirements with upstream, add new
+      dependencies on oslo-log and python-barbicanclient.
+  * Enable unit test suite execution:
+    - d/control: Switch BD on python-neutron -> neutron-common.
+    - d/rules: Enable execution of unit tests, skipping tests that require
+      access to /etc/neutron/neutron.conf.
+
+ -- James Page <james.page@ubuntu.com>  Mon, 30 Mar 2015 11:19:14 +0100
+
+neutron-lbaas (1:2015.1~b2-0ubuntu1) vivid; urgency=medium
+
+  * New upstream release.
+    - d/control: Update/align with upstream dependency changes.
+
+ -- James Page <james.page@ubuntu.com>  Mon, 16 Feb 2015 09:24:28 +0000
+
+neutron-lbaas (1:2015.1~b1-0ubuntu5) vivid; urgency=medium
+
+  * d/copyright: Update reference for Format field.
+  * d/control: Add ${python:Depends} to python-neutron-lbaas package.
+
+ -- James Page <james.page@ubuntu.com>  Tue, 20 Jan 2015 10:02:48 +0000
+
+neutron-lbaas (1:2015.1~b1-0ubuntu4) vivid; urgency=medium
+
+  * Initial release for OpenStack Kilo-1 milestone.
+
+ -- James Page <james.page@ubuntu.com>  Wed, 14 Jan 2015 11:31:23 +0000
