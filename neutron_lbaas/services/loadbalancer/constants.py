@@ -13,6 +13,21 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo_config import cfg
+
+CONF = cfg.CONF
+
+OPTS = [
+    cfg.BoolOpt(
+        'disable_unsupported_protocols',
+        default=False,
+        help=_("Disable protocols that midonet doesn't support")
+    )
+]
+
+cfg.CONF.register_opts(OPTS, 'midonet')
+
+
 #FIXME(brandon-logan): change these to LB_ALGORITHM
 LB_METHOD_ROUND_ROBIN = 'ROUND_ROBIN'
 LB_METHOD_LEAST_CONNECTIONS = 'LEAST_CONNECTIONS'
@@ -171,3 +186,14 @@ LOADBALANCER_STATS_EVENT = 'loadbalancer_stats'
 MEMBER_EVENT = 'member'
 OPERATING_STATUS = 'operating_status'
 POOL_EVENT = 'pool'
+
+
+if cfg.CONF.midonet.disable_unsupported_protocols:
+    SUPPORTED_LB_ALGORITHMS = (LB_METHOD_ROUND_ROBIN,)
+    POOL_SUPPORTED_PROTOCOLS = (PROTOCOL_TCP,)
+    LISTENER_SUPPORTED_PROTOCOLS = (PROTOCOL_TCP,)
+    LISTENER_POOL_COMPATIBLE_PROTOCOLS = (
+        (PROTOCOL_TCP, PROTOCOL_TCP),
+    )
+    SUPPORTED_HEALTH_MONITOR_TYPES = (HEALTH_MONITOR_PING, HEALTH_MONITOR_TCP)
+    SUPPORTED_SP_TYPES = (SESSION_PERSISTENCE_SOURCE_IP,)
