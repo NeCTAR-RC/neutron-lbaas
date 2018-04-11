@@ -135,15 +135,7 @@ class BaseTestCase(manager.NetworkScenarioTest):
                             self.subnet['id'])
             self.network = tenant_net
         else:
-            self.network = self._get_network_by_name(
-                config.compute.fixed_network_name)
-            # We are assuming that the first subnet associated
-            # with the fixed network is the one we want.  In the future, we
-            # should instead pull a subnet id from config, which is set by
-            # devstack/admin/etc.
-            subnet = self.os_primary.subnets_client.list_subnets(
-                network_id=self.network['id'])['subnets'][0]
-            self.subnet = subnet
+            self.network, self.subnet, self.router = self.create_networks()
 
     def _create_security_group_for_test(self):
         self.security_group = self._create_security_group(
