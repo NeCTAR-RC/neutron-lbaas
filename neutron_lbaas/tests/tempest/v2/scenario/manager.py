@@ -55,6 +55,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         cls.security_groups_client = cls.os_primary.security_groups_client
         cls.security_group_rules_client = (
             cls.os_primary.security_group_rules_client)
+        cls.interface_client = cls.os_primary.interfaces_client
 
     # ## Test functions library
     #
