@@ -92,9 +92,17 @@ class LoadBalancerPluginDbv2(agent_scheduler.LbaasAgentSchedulerDbMixin):
             return False
         return True
 
-    def _get_resources(self, context, model, filters=None):
+<<<<<<< HEAD
+    def _get_resources(self, context, model, filters=None, options=None):
         query = model_query.get_collection_query(context, model,
                                                  filters=filters)
+        if options:
+            query = query.options(options)
+=======
+    def _get_resources(self, context, model, filters=None):
+        query = self._get_collection_query(context, model,
+                                           filters=filters)
+>>>>>>> c0d2fed79... Revert "Improve speed of listing from DB"
         return [model_instance for model_instance in query]
 
     def _create_port_choose_fixed_ip(self, fixed_ips):
