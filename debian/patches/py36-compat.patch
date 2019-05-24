@@ -1,0 +1,55 @@
+From cb612c1a74c158bb91e8f7bee49c747b13b60d27 Mon Sep 17 00:00:00 2001
+From: James Page <james.page@ubuntu.com>
+Date: Fri, 15 Jun 2018 14:44:54 +0100
+Subject: [PATCH] Misc Python 3.6 fixes
+
+Improve patching of sys.argv
+
+Ensure that sys.argv is patched with an array; Python 3.6
+enforces more strict type checking on the contents of argv,
+and will throw an exception if presented with a Mock.
+
+Ensure list of expected codes is sorted
+
+The order of the expected codes list for haproxy templates
+is not deterministic under Python 3.6; ensure set of codes
+is sorted for determinism.
+
+Change-Id: Ia51a2f22070f495d88cde181382b5751e8a1109f
+---
+ neutron_lbaas/drivers/haproxy/jinja_cfg.py   | 2 +-
+ neutron_lbaas/tests/unit/agent/test_agent.py | 5 ++++-
+ 2 files changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/neutron_lbaas/drivers/haproxy/jinja_cfg.py b/neutron_lbaas/drivers/haproxy/jinja_cfg.py
+index 22dadf310..e45339a77 100644
+--- a/neutron_lbaas/drivers/haproxy/jinja_cfg.py
++++ b/neutron_lbaas/drivers/haproxy/jinja_cfg.py
+@@ -409,4 +409,4 @@ def _expand_expected_codes(codes):
+                 str(i) for i in six.moves.range(int(low), int(hi) + 1))
+         else:
+             retval.add(code)
+-    return retval
++    return set(sorted(retval))
+diff --git a/neutron_lbaas/tests/unit/agent/test_agent.py b/neutron_lbaas/tests/unit/agent/test_agent.py
+index c70cfbac6..629d8e124 100644
+--- a/neutron_lbaas/tests/unit/agent/test_agent.py
++++ b/neutron_lbaas/tests/unit/agent/test_agent.py
+@@ -36,10 +36,13 @@ class TestLbaasService(base.BaseTestCase):
+     def test_main(self):
+         logging_str = 'neutron.conf.agent.common.setup_logging'
+         privsep_str = 'neutron.conf.agent.common.setup_privsep'
++        test_args = [
++            'neutron-lbaasv2-agent',
++        ]
+         with mock.patch(logging_str), \
+                 mock.patch(privsep_str), \
+                 mock.patch.object(agent.service, 'launch') as mock_launch, \
+-                mock.patch('sys.argv'), \
++                mock.patch('sys.argv', test_args), \
+                 mock.patch.object(agent.manager, 'LbaasAgentManager'), \
+                 mock.patch.object(cfg.CONF, 'register_opts'):
+             agent.main()
+-- 
+2.17.0
+
